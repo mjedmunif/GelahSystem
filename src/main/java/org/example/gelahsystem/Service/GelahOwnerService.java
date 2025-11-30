@@ -121,5 +121,12 @@ public class GelahOwnerService {
        return 0;
    }
 
-
+   public List<OrderGelah> getGelahByStatus(Integer ownerId){
+        Gelah check = gelahRepository.findGelahByOwnerId(ownerId);
+        List<OrderGelah> orderGelah = orderGelahRepository.getGelahByStatus(ownerId);
+        if (check == null){
+            return null;
+        }
+        return orderGelahRepository.getGelahByStatus(ownerId);
+   }
 }

@@ -58,4 +58,5 @@ public class GelahService {
         gelahRepository.delete(deleted);
         return 0;
     }
+
 }

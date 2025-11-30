@@ -1,5 +1,6 @@
 package org.example.gelahsystem.Repository;
 
+import org.example.gelahsystem.Model.Gelah;
 import org.example.gelahsystem.Model.OrderGelah;
 import org.hibernate.query.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +27,9 @@ public interface OrderGelahRepository extends JpaRepository<OrderGelah , Integer
 
     @Query("select o.date, o.timeFrom , o.timeTo from OrderGelah o where o.gelahId = ?1 and o.status = ?2 order by o.date, o.timeFrom")
     List<Object[]> findOrderGelahsByGelahIdAndStatusOrderByTimeFromAsc(Integer gelahId, String status);
+
+    @Query("select o from OrderGelah o where o.status = 'pending' and o.gelahId = ?1")
+    List<OrderGelah> getGelahByStatus(Integer ownerId);
+
+    List<OrderGelah> findOrderGelahByClientId(Integer clientId);
 }

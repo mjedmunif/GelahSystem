@@ -28,11 +28,9 @@ public class Review {
 
     @NotNull(message = "rating must be not empty")
     @Column(nullable = false)
-    private Integer rating;
-
+    private Double rating;
 
     private String comment;
-
 
     private LocalDate createdAt;
 

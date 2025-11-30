@@ -4,10 +4,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gelahsystem.API.ApiResponse;
 import org.example.gelahsystem.Model.GelahOwner;
+import org.example.gelahsystem.Model.OrderGelah;
+import org.example.gelahsystem.Repository.GelahRepository;
 import org.example.gelahsystem.Service.GelahOwnerService;
+import org.example.gelahsystem.Service.GelahService;
+import org.hibernate.query.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/gelahOwner")
@@ -16,6 +22,8 @@ public class GelahOwnerController {
 
 
     private final GelahOwnerService gelahOwnerService;
+    private final GelahService gelahService;
+    private final GelahRepository gelahRepository;
 
     @GetMapping("/get")
     public ResponseEntity<?> getAllOwners(){
@@ -88,5 +96,14 @@ public class GelahOwnerController {
             return ResponseEntity.status(400).body(new ApiResponse("Order Not found"));
         }
         return ResponseEntity.status(200).body(new ApiResponse("rejected successfully"));
+    }
+
+    @GetMapping("/getGelahStatusPending/{ownerId}")
+    public ResponseEntity<?> getGelahByStatus(@PathVariable Integer ownerId){
+        List<OrderGelah> check = gelahOwnerService.getGelahByStatus(ownerId);
+        if (check == null){
+            return ResponseEntity.status(404).body(new ApiResponse("Gelah not found"));
+        }
+        return ResponseEntity.status(200).body(check);
     }
 }

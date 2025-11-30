@@ -8,6 +8,7 @@ import org.example.gelahsystem.Model.OrderGelah;
 import org.example.gelahsystem.Repository.ClientRepository;
 import org.example.gelahsystem.Repository.GelahRepository;
 import org.example.gelahsystem.Repository.OrderGelahRepository;
+import org.example.gelahsystem.Repository.ReviewRepository;
 import org.hibernate.query.Order;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,8 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final OrderGelahRepository orderGelahRepository;
     private final GelahRepository gelahRepository;
+    private final ReviewService reviewService;
+    private final ReviewRepository reviewRepository;
 
     public List<Client> getAllClient(){
         return clientRepository.findAll();
@@ -80,5 +83,40 @@ public class ClientService {
         cancelOrder.setStatus("canceled");
         orderGelahRepository.save(cancelOrder);
         return 0;
+    }
+
+    public List<Gelah> getGelahbyPriceLowestToHighest(){
+        if (gelahRepository.getGelahbyPriceFromLowestToHighest().isEmpty()){
+            return null;
+        }
+        return gelahRepository.getGelahbyPriceFromLowestToHighest();
+    }
+
+    public List<Gelah> getGelahHasNoChef(){
+        return gelahRepository.findGelahByHasChef(false);
+    }
+
+    public List<Object[]> getGelahHasChefWithChefInfo(){
+        return gelahRepository.getGelahByHasChefAndChefInfo();
+    }
+
+    public List<Gelah> getGelahByRatingHighestToLowest(){
+        return gelahRepository.getGelahByRatingHighestToLowest();
+    }
+
+    public List<OrderGelah> getHistoryOrders(Integer clientId){
+        Client c = clientRepository.findClientById(clientId);
+        if (c == null){
+            return null;
+        }
+        return orderGelahRepository.findOrderGelahByClientId(clientId);
+    }
+
+    public List<Object[]> getReviewsByGelahId(Integer gelahId){
+        Gelah checkStatus = gelahRepository.findGelahById(gelahId);
+        if (checkStatus == null){
+            return null;
+        }
+        return reviewRepository.getReviewByGelahId(gelahId);
     }
 }

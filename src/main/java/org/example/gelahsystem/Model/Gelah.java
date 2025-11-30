@@ -21,6 +21,8 @@ public class Gelah {
     @Column(nullable = false)
     private String location;
 
+    @Column(columnDefinition = "int default 0")
+    private Double rating;
 
     @Column(columnDefinition = "boolean default false")
     private Boolean hasChef;
