@@ -1,5 +1,6 @@
 package org.example.gelahsystem.Service;
 
+import jakarta.annotation.PostConstruct;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,6 @@ public class WhatsAppService {
     private final String TOKEN = "y655goujvn72sxbn";
 
     public String sendMessage(String to , String body){
-        Unirest.config().socketTimeout(0).connectTimeout(0);
         HttpResponse<String> response = Unirest.post(INSTANCE_URL)
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .field("token", TOKEN)
@@ -24,5 +24,13 @@ public class WhatsAppService {
         return response.getBody();
     }
 
+        @PostConstruct
+        public void init() {
+            Unirest.config().reset();
+            Unirest.config()
+                    .socketTimeout(5000)
+                    .connectTimeout(5000)
+                    .verifySsl(false);
+        }
 
 }

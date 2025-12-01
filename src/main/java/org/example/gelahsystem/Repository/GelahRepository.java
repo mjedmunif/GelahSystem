@@ -26,4 +26,5 @@ public interface GelahRepository extends JpaRepository<Gelah , Integer> {
     List<Gelah> getGelahByRatingHighestToLowest();
 
 
+
 }

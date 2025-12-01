@@ -32,4 +32,7 @@ public interface OrderGelahRepository extends JpaRepository<OrderGelah , Integer
     List<OrderGelah> getGelahByStatus(Integer ownerId);
 
     List<OrderGelah> findOrderGelahByClientId(Integer clientId);
+
+    @Query("select o from OrderGelah o where o.gelahId = ?1 and o.date = ?2 and o.status = 'pending' and o.timeFrom < ?4 and o.timeTo > ?3")
+    List<OrderGelah> findPendingOverlaps(Integer gelahId, LocalDate date, LocalTime timeFrom, LocalTime timeTo);
 }

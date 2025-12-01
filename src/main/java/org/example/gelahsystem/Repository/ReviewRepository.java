@@ -17,4 +17,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     @Query("select r.rating,r.comment from Review r where r.gelahId = ?1")
     List<Object[]> getReviewByGelahId(Integer gelahId);
+
+
 }

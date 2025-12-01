@@ -12,6 +12,12 @@ import org.example.gelahsystem.Repository.GelahRepository;
 import org.example.gelahsystem.Repository.OrderGelahRepository;
 import org.springframework.stereotype.Service;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -23,6 +29,8 @@ public class GelahOwnerService {
     private final ClientRepository clientRepository;
     private final OrderGelahRepository orderGelahRepository;
     private final GelahRepository gelahRepository;
+    private final PdfService pdfService;
+    private final EmailService emailService;
 
     public List<GelahOwner> getAllGelah(){
         return gelahOwnerRepository.findAll();
@@ -77,25 +85,23 @@ public class GelahOwnerService {
        if (order.getStatus().equalsIgnoreCase("canceled")){
            return 5;
        }
-       List<OrderGelah> sameDay = orderGelahRepository.findOrderGelahByGelahIdAndDate(gelahId , order.getDate());
-       for (OrderGelah existing : sameDay){
-           if (existing.getStatus().equalsIgnoreCase("accepted")){
-               if (order.getTimeFrom().isBefore(existing.getTimeTo()) && order.getTimeTo().isAfter(existing.getTimeFrom())){
-                   return 4;
-               }
-           }
-       }
+       List<OrderGelah> overlaps = orderGelahRepository.findAcceptedOverlaps(gelahId, order.getDate(), order.getTimeFrom(), order.getTimeTo());
+       if (!overlaps.isEmpty()) return 4;
        order.setStatus("accepted");
        orderGelahRepository.save(order);
+       byte[] pdf = pdfService.generateInvoicePdf(
+               client.getFirstName() + " " + client.getLastName(),
+               "قيلة " + gelah.getLocation(),
+               order.getPrice()
+       );
 
+       emailService.sendEmailWithPdf(client.getEmail(), "طلب القيلة", "تم قبول طلبك في قيلة " + gelah.getLocation(), pdf, "order-invoice.pdf");
 //       if accepted one order reject all order same time
-       for (OrderGelah pending : sameDay){
-           if (!pending.getId().equals(order.getId()) && pending.getStatus().equalsIgnoreCase("pending")){
-               if (order.getTimeFrom().isBefore(pending.getTimeTo()) && order.getTimeTo().isAfter(pending.getTimeFrom())){
-                   pending.setStatus("rejected");
-                   orderGelahRepository.save(pending);
-               }
-           }
+       List<OrderGelah> pendingOverlaps = orderGelahRepository.findPendingOverlaps(gelahId, order.getDate(), order.getTimeFrom(), order.getTimeTo());
+
+       for (OrderGelah p : pendingOverlaps) {
+           p.setStatus("rejected");
+           orderGelahRepository.save(p);
        }
        return 0;
    }
@@ -123,7 +129,6 @@ public class GelahOwnerService {
 
    public List<OrderGelah> getGelahByStatus(Integer ownerId){
         Gelah check = gelahRepository.findGelahByOwnerId(ownerId);
-        List<OrderGelah> orderGelah = orderGelahRepository.getGelahByStatus(ownerId);
         if (check == null){
             return null;
         }

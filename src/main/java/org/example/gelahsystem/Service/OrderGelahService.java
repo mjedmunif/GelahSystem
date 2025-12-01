@@ -21,6 +21,7 @@ public class OrderGelahService {
     private final OrderGelahRepository orderGelahRepository;
     private final GelahRepository gelahRepository;
     private final ClientRepository clientRepository;
+    private final WhatsAppService whatsAppService;
 
 
 //    todo has Gelah id and ClientId
@@ -46,10 +47,19 @@ public class OrderGelahService {
         if (!duplicates.isEmpty()){
             return 5;
         }
+
         orderGelah.setCreatedAt(LocalDate.now());
         orderGelah.setPrice(checkGelah.getPrice());
         orderGelah.setStatus("pending");
         orderGelahRepository.save(orderGelah);
+        String message =
+                "تم استلام طلبك رقم #" + orderGelah.getId() + "\n" +
+                        "الحالة: " + orderGelah.getStatus() + "\n" +
+                        "الموقع: " + orderGelah.getLocation() + "\n" +
+                        "الوقت: " + orderGelah.getTimeFrom() + "\n" +
+                        "شكراً لاستخدامك خدمتنا!";
+
+        whatsAppService.sendMessage(checkClient.getPhoneNumber() , message );
         return 0;
     }
 

@@ -7,9 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.gelahsystem.API.ApiResponse;
 import org.example.gelahsystem.Model.Client;
 import org.example.gelahsystem.Model.Gelah;
+import org.example.gelahsystem.Model.GelahOwner;
 import org.example.gelahsystem.Model.OrderGelah;
+import org.example.gelahsystem.Repository.GelahOwnerRepository;
 import org.example.gelahsystem.Repository.GelahRepository;
 import org.example.gelahsystem.Repository.OrderGelahRepository;
+import org.example.gelahsystem.Service.AIServer;
 import org.example.gelahsystem.Service.ClientService;
 import org.hibernate.query.Order;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,8 @@ public class ClientController {
     private final ClientService clientService;
     private final OrderGelahRepository orderGelahRepository;
     private final GelahRepository gelahRepository;
+    private final AIServer aiServer;
+    private final GelahOwnerRepository gelahOwnerRepository;
 
     @GetMapping("/get")
     public ResponseEntity<?> getAllClient(){
@@ -111,7 +116,7 @@ public class ClientController {
         return ResponseEntity.status(200).body(clientService.getGelahByRatingHighestToLowest());
     }
 
-    @GetMapping("/getHistoryOrders")
+    @GetMapping("/getHistoryOrders/{clientId}")
     public ResponseEntity<?> getHistoryOrders(@PathVariable Integer clientId){
         List<OrderGelah> checkStatus = clientService.getHistoryOrders(clientId);
         if (checkStatus == null){
@@ -127,5 +132,19 @@ public class ClientController {
             return ResponseEntity.status(404).body(new ApiResponse("Gelah with id '"+gelahId+"' not found"));
         }
         return ResponseEntity.status(200).body(clientService.getReviewsByGelahId(gelahId));
+    }
+
+    @GetMapping(value = "/askAI/{message}", produces = "text/plain; charset=UTF-8")
+    public String askAI(@PathVariable String message) {
+        return aiServer.getCampingSuggestions(message);
+    }
+
+    @GetMapping("/gelahByFistName/{firstName}")
+    public ResponseEntity<?> getOwnerByFirstName(@PathVariable String firstName) {
+        List<GelahOwner> owners = gelahOwnerRepository.findGelahOwnersByFirstName(firstName);
+        if (owners.isEmpty()) {
+            return ResponseEntity.status(404).body("not found");
+        }
+        return ResponseEntity.status(200).body(owners);
     }
 }

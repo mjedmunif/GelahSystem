@@ -4,11 +4,9 @@ package org.example.gelahsystem.Service;
 import lombok.AllArgsConstructor;
 import org.example.gelahsystem.Model.Client;
 import org.example.gelahsystem.Model.Gelah;
+import org.example.gelahsystem.Model.GelahOwner;
 import org.example.gelahsystem.Model.OrderGelah;
-import org.example.gelahsystem.Repository.ClientRepository;
-import org.example.gelahsystem.Repository.GelahRepository;
-import org.example.gelahsystem.Repository.OrderGelahRepository;
-import org.example.gelahsystem.Repository.ReviewRepository;
+import org.example.gelahsystem.Repository.*;
 import org.hibernate.query.Order;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +22,7 @@ public class ClientService {
     private final GelahRepository gelahRepository;
     private final ReviewService reviewService;
     private final ReviewRepository reviewRepository;
+    private final GelahOwnerRepository gelahOwnerRepository;
 
     public List<Client> getAllClient(){
         return clientRepository.findAll();
@@ -119,4 +118,9 @@ public class ClientService {
         }
         return reviewRepository.getReviewByGelahId(gelahId);
     }
+
+    public List<GelahOwner> getOwnersByFirstName(String firstName) {
+        return gelahOwnerRepository.findGelahOwnersByFirstName(firstName);
+    }
+
 }
