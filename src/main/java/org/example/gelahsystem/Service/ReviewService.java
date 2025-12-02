@@ -1,6 +1,7 @@
 package org.example.gelahsystem.Service;
 
 import lombok.AllArgsConstructor;
+import org.example.gelahsystem.API.APIExecption;
 import org.example.gelahsystem.Model.Client;
 import org.example.gelahsystem.Model.Gelah;
 import org.example.gelahsystem.Model.OrderGelah;
@@ -27,25 +28,25 @@ public class ReviewService {
         return reviewRepository.findAll();
     }
 
-    public Integer addReview(Review review){
+    public void addReview(Review review){
         Gelah checkGelah = gelahRepository.findGelahById(review.getGelahId());
         Client checkClient = clientRepository.findClientById(review.getClientId());
         OrderGelah orderGelah = orderGelahRepository.findOrderGelahByClientIdAndGelahId(review.getClientId(),review.getGelahId());
         Review hasReview = reviewRepository.findReviewByClientIdAndGelahId(review.getClientId() , review.getGelahId());
         if (checkClient == null){
-            return 1;
+            throw new APIExecption("Client not found");
         }
         if (checkGelah == null){
-            return 2;
+            throw new APIExecption("Gelah not found");
         }
         if (review.getRating() > 5 || review.getRating() < 1){
-            return 3;
+            throw new APIExecption("rating must be between 1 to 5 ");
         }
         if (orderGelah == null){
-            return 4;
+            throw new APIExecption("order not found");
         }
         if (hasReview != null){
-            return 5;
+            throw new APIExecption("you has no review");
         }
         review.setCreatedAt(LocalDate.now());
         reviewRepository.save(review);
@@ -54,28 +55,27 @@ public class ReviewService {
         Gelah gelah = gelahRepository.findGelahById(review.getGelahId());
         gelah.setRating(avg);
         gelahRepository.save(gelah);
-        return 0;
     }
 
-    public Integer updateReview(Integer id , Review review){
+    public void updateReview(Integer id , Review review){
         Gelah checkGelah = gelahRepository.findGelahById(review.getGelahId());
         Review oldReview = reviewRepository.findReviewById(id);
         Client checkClient = clientRepository.findClientById(review.getClientId());
         OrderGelah orderGelah = orderGelahRepository.findOrderGelahByClientIdAndGelahId(review.getClientId(),review.getGelahId());
         if (oldReview == null){
-            return 1;
+            throw new APIExecption("review not found");
         }
         if (checkClient == null){
-            return 2;
+            throw new APIExecption("client not found");
         }
         if (checkGelah == null){
-            return 3;
+            throw new APIExecption("Gelah not found");
         }
         if (review.getRating() > 5 || review.getRating() < 1) {
-            return 4;
+            throw new APIExecption("rating must be between 1 to 5");
         }
         if (orderGelah == null){
-            return 5;
+            throw new APIExecption("order not found");
         }
         oldReview.setComment(review.getComment());
         oldReview.setGelahId(review.getGelahId());
@@ -87,20 +87,18 @@ public class ReviewService {
         Gelah gelah = gelahRepository.findGelahById(review.getGelahId());
         gelah.setRating(avg);
         gelahRepository.save(gelah);
-        return 0;
     }
 
-    public Boolean deleteReview(Integer id){
+    public void deleteReview(Integer id){
         Review deleted = reviewRepository.findReviewById(id);
         if (deleted == null){
-            return false;
+            throw new APIExecption("review not found");
         }
         reviewRepository.delete(deleted);
         Double avg = reviewRepository.getAverageRating(deleted.getGelahId());
         Gelah gelah = gelahRepository.findGelahById(deleted.getGelahId());
         gelah.setRating(avg);
         gelahRepository.save(gelah);
-        return true;
     }
 
 }

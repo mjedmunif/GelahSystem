@@ -22,61 +22,20 @@ public class ReviewController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addReview(@RequestBody @Valid Review review , Errors errors){
-        if (errors.hasErrors()){
-            String message = errors.getFieldError().getDefaultMessage();
-            return ResponseEntity.status(400).body(new ApiResponse(message));
-        }
-        int checkStatus = reviewService.addReview(review);
-        if (checkStatus == 1){
-            return ResponseEntity.status(404).body(new ApiResponse("client with id '"+review.getClientId() +"' not found"));
-        }
-        if (checkStatus == 2){
-            return ResponseEntity.status(404).body(new ApiResponse("Gelah with id '"+review.getGelahId()+"' not found"));
-        }
-        if (checkStatus == 3){
-            return ResponseEntity.status(400).body(new ApiResponse("rating should be between 1 and 5"));
-        }
-        if (checkStatus == 4){
-            return ResponseEntity.status(404).body(new ApiResponse("Client with this Gelah has no order"));
-        }
-        if (checkStatus == 5){
-            return ResponseEntity.status(400).body(new ApiResponse("you have a previous review"));
-        }
+    public ResponseEntity<?> addReview(@RequestBody @Valid Review review ){
+        reviewService.addReview(review);
         return ResponseEntity.status(200).body(new ApiResponse("added review successfully"));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateReview(@PathVariable Integer id , @RequestBody @Valid Review review , Errors errors){
-        if (errors.hasErrors()){
-            String message = errors.getFieldError().getDefaultMessage();
-            return ResponseEntity.status(400).body(new ApiResponse(message));
-        }
-        int checkStatus = reviewService.updateReview(id, review);
-        if (checkStatus == 1){
-            return ResponseEntity.status(404).body(new ApiResponse("you dont has previous order"));
-        }
-        if (checkStatus == 2){
-            return ResponseEntity.status(404).body(new ApiResponse("client with id '"+review.getClientId() +"' not found"));
-        }
-        if (checkStatus == 3){
-            return ResponseEntity.status(404).body(new ApiResponse("Gelah with id '"+review.getGelahId()+"' not found"));
-        }
-        if (checkStatus == 4){
-            return ResponseEntity.status(400).body(new ApiResponse("rating should be between 1 and 5"));
-        }
-        if (checkStatus == 5){
-            return ResponseEntity.status(404).body(new ApiResponse("Client with this Gelah has no order"));
-        }
+        reviewService.updateReview(id, review);
         return ResponseEntity.status(200).body(new ApiResponse("updated review successfully"));
     }
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<?> deleteReview(@PathVariable Integer id){
-        boolean checkStatus = reviewService.deleteReview(id);
-        if (checkStatus){
-            return ResponseEntity.status(404).body(new ApiResponse("review with id '"+ id +"' Not found"));
-        }
+        reviewService.deleteReview(id);
         return ResponseEntity.status(200).body(new ApiResponse("deleted review successfully"));
     }
 

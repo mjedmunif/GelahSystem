@@ -3,8 +3,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import kong.unirest.Unirest;
-import kong.unirest.JsonNode;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +45,6 @@ public class AIServer {
             HttpResponse<String> response =
                     client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            System.out.println("AI RAW RESPONSE = " + response.body());
 
             JSONObject obj = new JSONObject(response.body());
 

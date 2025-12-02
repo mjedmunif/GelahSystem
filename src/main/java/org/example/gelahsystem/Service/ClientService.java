@@ -2,12 +2,11 @@ package org.example.gelahsystem.Service;
 
 
 import lombok.AllArgsConstructor;
+import org.example.gelahsystem.API.APIExecption;
 import org.example.gelahsystem.Model.Client;
 import org.example.gelahsystem.Model.Gelah;
-import org.example.gelahsystem.Model.GelahOwner;
 import org.example.gelahsystem.Model.OrderGelah;
 import org.example.gelahsystem.Repository.*;
-import org.hibernate.query.Order;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -33,10 +32,10 @@ public class ClientService {
         clientRepository.save(client);
     }
 
-    public Boolean updateClient(Integer id , Client client){
+    public void updateClient(Integer id , Client client){
        Client c =  clientRepository.findClientById(id);
        if (c == null){
-           return false;
+           throw new APIExecption("Client not found");
        }
        c.setBirthDate(client.getBirthDate());
        c.setCity(client.getCity());
@@ -47,41 +46,38 @@ public class ClientService {
        c.setUsername(client.getUsername());
        c.setPassword(client.getPassword());
        clientRepository.save(c);
-       return true;
     }
 
-    public Boolean deleteClient(Integer id){
+    public void deleteClient(Integer id){
         Client c = clientRepository.findClientById(id);
         if (c == null){
-            return false;
+            throw new APIExecption("Client not found");
         }
         clientRepository.delete(c);
-        return true;
     }
 
     public List<Object[]> getReservedTimes(Integer gelahId){
         Gelah check = gelahRepository.findGelahById(gelahId);
         if (check == null){
-            return null;
+            throw new APIExecption("Gelah not found");
         }
         return orderGelahRepository.findOrderGelahsByGelahIdAndStatusOrderByTimeFromAsc(gelahId , "accepted");
     }
 
 
-    public Integer cancelOrder(Integer clientId , Integer gelahId ){
+    public void cancelOrder(Integer clientId , Integer gelahId ){
         OrderGelah cancelOrder = orderGelahRepository.findOrderGelahByClientIdAndGelahId(clientId, gelahId);
         if (cancelOrder == null){
-            return 1;
+            throw new APIExecption("order not found");
         }
         if (cancelOrder.getStatus().equalsIgnoreCase("accepted")){
-            return 2;
+            throw new APIExecption("this order accepted by owner");
         }
         if (cancelOrder.getStatus().equalsIgnoreCase("rejected")){
-            return 3;
+            throw new APIExecption("order rejected by owner");
         }
         cancelOrder.setStatus("canceled");
         orderGelahRepository.save(cancelOrder);
-        return 0;
     }
 
     public List<Gelah> getGelahbyPriceLowestToHighest(){
@@ -106,7 +102,7 @@ public class ClientService {
     public List<OrderGelah> getHistoryOrders(Integer clientId){
         Client c = clientRepository.findClientById(clientId);
         if (c == null){
-            return null;
+            throw new APIExecption("Client not found");
         }
         return orderGelahRepository.findOrderGelahByClientId(clientId);
     }
@@ -114,12 +110,12 @@ public class ClientService {
     public List<Object[]> getReviewsByGelahId(Integer gelahId){
         Gelah checkStatus = gelahRepository.findGelahById(gelahId);
         if (checkStatus == null){
-            return null;
+            throw new APIExecption("Gelah not found");
         }
         return reviewRepository.getReviewByGelahId(gelahId);
     }
 
-    public List<GelahOwner> getOwnersByFirstName(String firstName) {
+    public List<Object[]> getOwnersByFirstName(String firstName) {
         return gelahOwnerRepository.findGelahOwnersByFirstName(firstName);
     }
 

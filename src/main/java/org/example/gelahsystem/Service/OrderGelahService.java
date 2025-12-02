@@ -2,6 +2,7 @@ package org.example.gelahsystem.Service;
 
 
 import lombok.AllArgsConstructor;
+import org.example.gelahsystem.API.APIExecption;
 import org.example.gelahsystem.Model.Client;
 import org.example.gelahsystem.Model.Gelah;
 import org.example.gelahsystem.Model.OrderGelah;
@@ -24,28 +25,26 @@ public class OrderGelahService {
     private final WhatsAppService whatsAppService;
 
 
-//    todo has Gelah id and ClientId
-
     public List<OrderGelah> getAllOrders(){
         return orderGelahRepository.findAll();
     }
 
-    public Integer addNewOrder(OrderGelah orderGelah){
+    public void addNewOrder(OrderGelah orderGelah){
         Gelah checkGelah = gelahRepository.findGelahById(orderGelah.getGelahId());
         Client checkClient = clientRepository.findClientById(orderGelah.getClientId());
         List<OrderGelah> conflict = orderGelahRepository.findAcceptedOverlaps(orderGelah.getGelahId() , orderGelah.getDate() , orderGelah.getTimeFrom() , orderGelah.getTimeTo());
         List<OrderGelah> duplicates = orderGelahRepository.findDuplicateOrder(orderGelah.getClientId(), orderGelah.getGelahId(), orderGelah.getDate(), orderGelah.getTimeFrom(), orderGelah.getTimeTo());
         if (checkGelah == null){
-            return 1;
+            throw new APIExecption("Gelah not found");
         }
         if (checkClient == null){
-            return 2;
+            throw new APIExecption("Client not found");
         }
         if (!conflict.isEmpty()){
-            return 4;
+            throw new APIExecption("Sorry this time reserved");
         }
         if (!duplicates.isEmpty()){
-            return 5;
+            throw new APIExecption("You have a previous order");
         }
 
         orderGelah.setCreatedAt(LocalDate.now());
@@ -60,22 +59,21 @@ public class OrderGelahService {
                         "شكراً لاستخدامك خدمتنا!";
 
         whatsAppService.sendMessage(checkClient.getPhoneNumber() , message );
-        return 0;
     }
 
-    public Integer updateOrder(Integer id , OrderGelah orderGelah){
+    public void updateOrder(Integer id , OrderGelah orderGelah){
        OrderGelah oldOrder = orderGelahRepository.findOrderGelahById(id);
         Client checkClient = clientRepository.findClientById(orderGelah.getClientId());
         Gelah checkGelah = gelahRepository.findGelahById(orderGelah.getGelahId());
 
         if (oldOrder == null){
-            return 1;
+            throw new APIExecption("order not found");
         }
         if (checkClient == null){
-            return 2;
+            throw new APIExecption("client not found");
         }
         if (checkGelah == null){
-            return 3;
+            throw new APIExecption("Gelah not found");
         }
 
         oldOrder.setCreatedAt(LocalDate.now());
@@ -87,16 +85,14 @@ public class OrderGelahService {
         oldOrder.setLocation(orderGelah.getLocation());
         oldOrder.setClientId(orderGelah.getClientId());
         orderGelahRepository.save(oldOrder);
-        return 0;
     }
 
-    public Boolean deleteOrder(Integer id){
+    public void deleteOrder(Integer id){
         OrderGelah deleted = orderGelahRepository.findOrderGelahById(id);
         if (deleted == null){
-            return false;
+            throw new APIExecption("order not found");
         }
         orderGelahRepository.delete(deleted);
-        return true;
     }
 
 }

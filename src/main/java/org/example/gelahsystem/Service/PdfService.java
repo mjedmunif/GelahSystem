@@ -20,10 +20,10 @@ public class PdfService {
             document.open();
 
             document.add(new Paragraph("فاتورة الطلب"));
-            document.add(new Paragraph("----------------------"));
-            document.add(new Paragraph("اسم العميل: " + clientName));
-            document.add(new Paragraph("الطلب: " + orderName));
-            document.add(new Paragraph("السعر: " + price + " ريال"));
+            document.add(new Paragraph("-----------Gelah------------"));
+            document.add(new Paragraph("name: " + clientName));
+            document.add(new Paragraph("order: " + orderName));
+            document.add(new Paragraph("price: " + price + " ريال"));
 
             document.close();
 
